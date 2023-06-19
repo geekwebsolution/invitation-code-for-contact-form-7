@@ -1,0 +1,149 @@
+#cf7ic_meta_box th {
+    text-align: left;
+    padding-right: 50px;
+    padding-left: 10px;
+}
+
+#cf7ic_meta_box td {
+    padding: 5px 0;
+}
+#cf7ic_meta_box td .note{
+    font-family: 'Consolas';
+}
+
+#cf7ic_meta_box tr {
+    vertical-align: text-top;
+}
+
+#cf7ic_meta_box tbody {
+    margin-top: 15px;
+    display: block;
+}
+
+label.cf7ic-switch {
+    cursor: pointer;
+}
+label.cf7ic-switch {
+    position: relative;
+    display: inline-block;
+    width: 54px;
+    height: 22px;
+}
+label.cf7ic-switch input[type="checkbox"] {
+    display: none;
+}
+
+label.cf7ic-switch input:checked+.cf7ic-slider {
+    background-color: #2196F3;
+}
+.cf7ic-slider {
+    border-radius: 20px;
+    box-shadow: 2px 2px 30px rgb(0 0 0 / 20%);
+}
+.cf7ic-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+input.cf7ic-checkbox:checked+.cf7ic-slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(36px);
+}
+.cf7ic-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 0;
+    bottom: 0px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+
+.cf7ic-form-element.cf7ic-calender img, .cf7ic-form-element svg {
+    position: absolute;
+    width: 16px;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.cf7ic-form-element svg{
+    cursor: pointer;
+    display: inline;
+    pointer-events: auto;
+}
+
+.cf7ic-form-element.cf7ic-calender, .cf7ic-form-element {
+    position: relative;
+    display: inline-block;
+}
+
+.cf7ic-field-box .note {
+    margin-top: 6px;
+}
+
+.cf7ic-remaining-amt span.cf7ic-green {
+    color: green;
+    font-weight: 500;
+}
+
+.cf7ic-expiration-date span.cf7ic-red {
+    color: red;
+    font-weight: 500;
+}
+/* Tooltip hover */
+.cf7ic-copy-to-clipboard {
+    width: fit-content;
+    height: 100%;
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.cf7ic-copy-text {
+    background-color: #252729;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    text-transform: lowercase;
+    text-align: center;
+    position: absolute;
+    width: calc(100% + 60px);
+    top: -30px;
+    right: -15px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.cf7ic-copy-text:before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    height: 0;
+    width: 0;
+    transform: translate(-50%, 0);
+    display: block;
+    border-right: 10px solid transparent;
+    border-left: 10px solid transparent;
+    border-top: 10px solid #252729;
+}
+
+.cf7ic-copy-to-clipboard:hover .cf7ic-copy-text{
+    top: -40px;
+    opacity: 1;
+}
