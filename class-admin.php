@@ -7,8 +7,30 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             add_action( 'add_meta_boxes', array( 'cf7ic_invitation_codes_settings','cf7ic_add_meta_box' ));
             add_action( 'save_post_cf7ic_invite_codes', array( 'cf7ic_invitation_codes_settings', 'cf7ic_save_meta' ));
             add_action( 'wpcf7_init', array( 'cf7ic_invitation_codes_settings','cf7ic_add_form_tag' ), 36, 0 );
+            add_action('admin_head-edit.php',array('cf7ic_invitation_codes_settings','cf7ic_addCustomImportButton'));
         }
+        /**
+         * Adds "Import" button on module list page
+         */
+        static function cf7ic_addCustomImportButton()
+        {
+            global $current_screen;
+            // Not our post type, exit earlier
+            // You can remove this if condition if you don't have any specific post type to restrict to. 
+            if ('cf7ic_invite_codes' != $current_screen->post_type) {
+                return;
+            }
+            ?>
+                <script type="text/javascript">
+                    jQuery(document).ready( function($)
+                    {
+                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='page-title-action'>Import</a>");
+                    });
 
+                </script>
+            <?php
+        }
+        
         static function cf7ic_add_meta_box() {
             add_meta_box(
                 'cf7ic_meta_box',

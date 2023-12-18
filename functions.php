@@ -220,6 +220,7 @@ if(!class_exists('cf7ic_invitation_code_functions')){
             wp_enqueue_style( 'cf7ic-admin-style', CF7IC_PLUGIN_URL . '/assets/css/admin-style.css', array(), CF7IC_BUILD );
             wp_enqueue_script('cf7ic-datetimepicker-js', CF7IC_PLUGIN_URL . '/assets/js/jquery.datetimepicker.min.js', array(), CF7IC_BUILD );
             wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), CF7IC_BUILD );
+	        wp_localize_script('cf7ic-admin-js', 'cf7ic_custom_call', ['ajaxurl' => admin_url('admin-ajax.php')]);
         }
     }
     new cf7ic_invitation_code_functions();
