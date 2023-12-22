@@ -8,6 +8,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             add_action( 'save_post_cf7ic_invite_codes', array( 'cf7ic_invitation_codes_settings', 'cf7ic_save_meta' ));
             add_action( 'wpcf7_init', array( 'cf7ic_invitation_codes_settings','cf7ic_add_form_tag' ), 36, 0 );
             add_action('admin_head-edit.php',array('cf7ic_invitation_codes_settings','cf7ic_addCustomImportButton'));
+            // add_action('admin_init', array('cf7ic_invitation_codes_settings','add_upload_section_to_post_listing_page'));
         }
         /**
          * Adds "Import" button on module list page
@@ -20,17 +21,39 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             if ('cf7ic_invite_codes' != $current_screen->post_type) {
                 return;
             }
+            $cf7ic_sample_file = CF7IC_PLUGIN_URL.'/assets/samples/cf7ic_invite_codes_imports.csv';
+            $args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1);
+            $cf7Forms = get_posts( $args );
+            if (!empty($cf7Forms)) { 
+                $cf7_forms = '<ul>';
+                foreach($cf7Forms as $key => $value){ 
+                        $cf7_forms .= "<li>($value->post_title  . $value->ID )</li>";
+                }
+                $cf7_forms .= '</ul>';
+            }
             ?>
                 <script type="text/javascript">
                     jQuery(document).ready( function($)
                     {
-                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='page-title-action'>Import</a>");
+                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='cf7ic_page-title-action page-title-action'>Import</a>");
+                        jQuery('body').on('click','#cf7ic_ImportData',function () { 
+                            // var $cf7ic_add_export_html;
+                            // cf7ic_add_export_html = "<div class='cf7ic_upload-file-section'>";
+                            // $cf7ic_add_export_html += "<h2>Upload File</h2>";
+                            // $cf7ic_add_export_html + "<p class='cf7ic_install-help'>Please Upload Sample CSV File <a href='<?php echo $cf7ic_sample_file;   ?>'>Sample</a></p>";
+                            // $cf7ic_add_export_html += "<form method='post' enctype='multipart/form-data'><input type='file' name='file_upload' /><input type='submit' value='Upload' /></form>";
+                            // $cf7ic_add_export_html += '</div>';
+                            // console.log($cf7ic_add_export_html);
+                            // jQuery($cf7ic_add_export_html).insertAfter('#cf7ic_ImportData');
+                            jQuery("<div class='cf7ic_upload-file-section'><h2>Upload File</h2><p class='cf7ic_install-help'>Please download Sample CSV File <a href='<?php echo $cf7ic_sample_file;   ?>'>Sample</a></p><p>Here is list of contact form <?php _e($cf7_forms)  ?></p><h2>Please upload the completed CSV spreadsheet file.</h2><form method='post' enctype='multipart/form-data'><input type='file' name='file_upload' /><input type='submit' value='Upload' /></form></div>").insertAfter('#cf7ic_ImportData');
+                        });
                     });
-
                 </script>
             <?php
         }
         
+
+
         static function cf7ic_add_meta_box() {
             add_meta_box(
                 'cf7ic_meta_box',

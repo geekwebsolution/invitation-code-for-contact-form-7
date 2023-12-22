@@ -21,27 +21,27 @@ jQuery(document).ready(function(){
                 action: "cf7ic_export_data",
             },
             success: function(data) {
-                console.log(data);
-               /*
-               * Make CSV downloadable
-               */
-              var downloadLink = document.createElement("a");
-              var fileData = ['\ufeff'+data];
+            //     console.log(data);
+            //    /*
+            //    * Make CSV downloadable
+            //    */
+            //   var downloadLink = document.createElement("a");
+            //   var fileData = ['\ufeff'+data];
 
-              var blobObject = new Blob(fileData,{
-                 type: "text/csv;charset=utf-8;"
-               });
+            //   var blobObject = new Blob(fileData,{
+            //      type: "text/csv;charset=utf-8;"
+            //    });
 
-              var url = URL.createObjectURL(blobObject);
-              downloadLink.href = url;
-              downloadLink.download = "csv_export.csv";
+            //   var url = URL.createObjectURL(blobObject);
+            //   downloadLink.href = url;
+            //   downloadLink.download = "csv_export.csv";
 
-              /*
-               * Actually download CSV
-               */
-              document.body.appendChild(downloadLink);
-              downloadLink.click();
-              document.body.removeChild(downloadLink);
+            //   /*
+            //    * Actually download CSV
+            //    */
+            //   document.body.appendChild(downloadLink);
+            //   downloadLink.click();
+            //   document.body.removeChild(downloadLink);
             },
         });
     })
