@@ -3,10 +3,10 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
     class cf7ic_invitation_codes_settings
     {
         public function __construct() {
-            add_action( 'init', array( 'cf7ic_invitation_codes_settings','cf7ic_custom_post_type' ));
-            add_action( 'add_meta_boxes', array( 'cf7ic_invitation_codes_settings','cf7ic_add_meta_box' ));
-            add_action( 'save_post_cf7ic_invite_codes', array( 'cf7ic_invitation_codes_settings', 'cf7ic_save_meta' ));
-            add_action( 'wpcf7_init', array( 'cf7ic_invitation_codes_settings','cf7ic_add_form_tag' ), 36, 0 );
+            add_action( 'init', array( $this,'cf7ic_custom_post_type' ));
+            add_action( 'add_meta_boxes', array( $this,'cf7ic_add_meta_box' ));
+            add_action( 'save_post_cf7ic_invite_codes', array( $this, 'cf7ic_save_meta' ));
+            add_action( 'wpcf7_init', array( $this,'cf7ic_add_form_tag' ), 36, 0 );
         }
 
         static function cf7ic_add_meta_box() {
@@ -43,7 +43,26 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                         </td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e('Invitation Code','invitation-code-for-contact-form-7'); ?></th>
+                        <th><?php esc_html_e('Select Contact Form 7*','invitation-code-for-contact-form-7'); ?></th>
+                        <td>
+                            <div class="cf7ic-field-box">
+                                <?php
+                                $args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1);
+                                $cf7Forms = get_posts( $args );
+                                foreach($cf7Forms as $key => $value){ ?>
+                                    <input type="checkbox" id="<?php esc_attr_e($value->post_name); ?>" class="cf7ic_contact_forms" name="cf7ic_contact_forms[]" value="<?php esc_attr_e($value->ID);?>" <?php if(in_array($value->ID,$cf7ic_contact_forms)) esc_attr_e('checked','invitation-code-for-contact-form-7'); ?>>
+                                    
+                                    <label for="<?php esc_attr_e($value->post_name); ?>"><?php esc_html_e($value->post_title . ' (#' . $value->ID . ')'); ?></label><br>
+                                    <?php
+                                }
+                                ?>
+                                <p class="note"><i><?php esc_html_e('Select contact form 7 for this code.','invitation-code-for-contact-form-7'); ?></i></p>
+                                <p class="notice" style="display: none;"><i><?php esc_html_e('Please Select contact form 7 for this code.','invitation-code-for-contact-form-7'); ?></i></p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Invitation Code*','invitation-code-for-contact-form-7'); ?></th>
                         <td>
                             <div class="cf7ic-field-box">
                                 <div class="cf7ic-form-element">
@@ -75,24 +94,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <th><?php esc_html_e('Select Contact Form 7','invitation-code-for-contact-form-7'); ?></th>
-                        <td>
-                            <div class="cf7ic-field-box">
-                                <?php
-                                $args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1);
-                                $cf7Forms = get_posts( $args );
-                                foreach($cf7Forms as $key => $value){ ?>
-                                    <input type="checkbox" id="<?php esc_attr_e($value->post_name); ?>" name="cf7ic_contact_forms[]" value="<?php esc_attr_e($value->ID);?>" <?php if(in_array($value->ID,$cf7ic_contact_forms)) esc_attr_e('checked','invitation-code-for-contact-form-7'); ?>>
-                                    
-                                    <label for="<?php esc_attr_e($value->post_name); ?>"><?php esc_html_e($value->post_title . ' (#' . $value->ID . ')'); ?></label><br>
-                                    <?php
-                                }
-                                ?>
-                                <p class="note"><i><?php esc_html_e('Select contact form 7 for this code.','invitation-code-for-contact-form-7'); ?></i></p>
-                            </div>
-                        </td>
-                    </tr>
+                    
                 </table>
             <?php
         }
