@@ -11,102 +11,95 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             add_action('admin_init', array('cf7ic_invitation_codes_settings','cf7ic_SaveImportedCSV'));
         }
         /**
-         * Adds "Import" button on module list page
+         * Add "Import" button on Invitation Codes list page
          */
         static function cf7ic_addCustomImportButton()
         {
             global $current_screen;
-            if ('cf7ic_invite_codes' != $current_screen->post_type) {
+            $cf7ic_post_type_slug = 'cf7ic_invite_codes';
+            if ($cf7ic_post_type_slug != $current_screen->post_type) {
                 return;
             }
-            $cf7ic_sample_file = CF7IC_PLUGIN_URL.'/assets/samples/cf7ic_invite_codes_imports.csv';
-            $args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1);
-            $cf7Forms = get_posts( $args );
-            if (!empty($cf7Forms)) { 
-                $cf7_forms = '<ul>';
+            $cf7ic_sample_file_path = CF7IC_PLUGIN_URL.'/assets/samples/cf7ic_invite_codes_imports.csv'; 
+            $cf7ic_form_args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1,'post_status'=>'published','orderby'=> 'title','order'=> 'ASC');
+            $cf7ic_cf7Forms = get_posts( $cf7ic_form_args );
+            $cf7ic_cf7FormsHTML  = '';
+            if (!empty($cf7ic_cf7Forms)) { 
+                $cf7ic_cf7FormsHTML .= '<ul>';
                 $i = 1;
-                foreach($cf7Forms as $key => $value){ 
-                        $cf7_forms .= "<li>$i. $value->post_title (#$value->ID)</li>";
+                foreach($cf7ic_cf7Forms as $key => $value){ 
+                        $cf7ic_cf7FormsHTML .= "<li>$i. $value->post_title (#$value->ID)</li>";
                     $i++;
                 }
-                $cf7_forms .= '</ul>';
+                $cf7ic_cf7FormsHTML .= '</ul>';
             }
-            
             ?>
                 <script type="text/javascript">
                     jQuery(document).ready( function($)
                     {
-                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='cf7ic_page-title-action page-title-action'>Import</a>");
+                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='cf7ic_page-title-action page-title-action'><?php esc_html_e('Import', 'invitation-code-for-contact-form-7')?></a>");
                         jQuery('body').on('click','#cf7ic_ImportData',function () { 
-                            jQuery("<div class='cf7ic_upload-file-section'><h2>Upload File</h2><p class='cf7ic_note'>Please download Sample CSV File <a href='<?php echo $cf7ic_sample_file;   ?>'>Sample</a></p><p>Here is list of contact form <?php _e($cf7_forms)  ?></p><h2>Please upload the completed CSV spreadsheet file.</h2><form action='' method='POST' enctype='multipart/form-data'><input type='file' name='csv_file_upload' accept='.csv' /><input type='submit' value='Upload' name='save_csv' /></form></div>").insertAfter('#cf7ic_ImportData');
+                            var cf7ic_cf7FormsHTML = '<?php _e($cf7ic_cf7FormsHTML) ?>';
+                            if (cf7ic_cf7FormsHTML == '') {
+                                jQuery("<div class='error notice'><p><?php esc_html_e('Make sure you have a contact form for importing codes.', 'invitation-code-for-contact-form-7')?></p></div>").insertAfter('#cf7ic_ImportData');
+                            }
+                            else{
+                                var cf7ic_file_upload_html = '';
+                                cf7ic_file_upload_html = "<div class='cf7ic_upload-file-section'>";
+                                    cf7ic_file_upload_html += "<h2><?php esc_html_e('Upload File','invitation-code-for-contact-form-7'); ?></h2>";
+                                    cf7ic_file_upload_html += "<p class='cf7ic_note'><?php esc_html_e('Please download Sample CSV File','invitation-code-for-contact-form-7'); ?> <a href='<?php esc_attr_e($cf7ic_sample_file_path);   ?>'><?php esc_html_e('Sample','invitation-code-for-contact-form-7'); ?></a></p>";
+                                    cf7ic_file_upload_html += "<p>Here is list of contact form"+cf7ic_cf7FormsHTML+ "</p>";
+                                    cf7ic_file_upload_html += "<h2><?php esc_html_e('Please upload the completed CSV spreadsheet file.','invitation-code-for-contact-form-7'); ?></h2>";
+                                    cf7ic_file_upload_html += "<form action='' method='POST' enctype='multipart/form-data'><input type='file' name='cf7ic_imported_file' accept='.csv' /><input type='submit' value='<?php esc_html_e('Upload','invitation-code-for-contact-form-7'); ?>' name='cf7ic_upload_csv' /></form>";
+                                cf7ic_file_upload_html += '</div>';
+                                jQuery(cf7ic_file_upload_html).insertAfter('#cf7ic_ImportData');
+                            }
                         });
                     });
                 </script>
             <?php
         }
         static function cf7ic_SaveImportedCSV(){
-            if (isset($_POST['save_csv'])) {
-                if ((isset($_FILES['csv_file_upload'])) && ($_FILES['csv_file_upload']['size'] !=0)) {
-                    $error = 0;
-                    $tmpName = $_FILES['csv_file_upload']['tmp_name'];
-                    $csv_data = array_map('str_getcsv', file($tmpName));
-                    if (!empty($csv_data)) {
-                        unset($csv_data[0]);
-                        if (!empty($csv_data)) {     
-                            for ($i=1; $i <=count($csv_data) ; $i++) { 
-                                if ((!empty($csv_data[$i][0])) && (!empty($csv_data[$i][2]))) {
-                                    $error = 0;
+            if (isset($_POST['cf7ic_upload_csv'])) {
+                /** Check if file uploaded or not */
+                if ((isset($_FILES['cf7ic_imported_file'])) && ($_FILES['cf7ic_imported_file']['size'] !=0)) {
+                    $cf7ic_error = 0;
+                    $cf7ic_fileTmpName = $_FILES['cf7ic_imported_file']['tmp_name'];
+                    $cf7ic_CSVdata = array_map('str_getcsv', file($cf7ic_fileTmpName)); // Get CSV Data in ARRAY
+                    if (!empty($cf7ic_CSVdata)) {
+                        unset($cf7ic_CSVdata[0]); //Unset CSV file header (First ROW) from CSV Data
+                        if (!empty($cf7ic_CSVdata)) {     
+                            for ($i=1; $i <=count($cf7ic_CSVdata) ; $i++) { 
+                                /**
+                                 * 0 => Post Title
+                                 * 1 => Status
+                                 * 2 => Invitation Code
+                                 * 3 => Expiration Date
+                                 * 4 => Usage limit per user
+                                 * 5 => Select Contact Form 7
+                                 */
+                                if ((!empty($cf7ic_CSVdata[$i][0])) && (!empty($cf7ic_CSVdata[$i][2])) && (!empty($cf7ic_CSVdata[$i][5]))) {
+                                    $cf7ic_error = 0;
                                 }   
                                 else{
-                                    $error = 1;
+                                    $cf7ic_error = 1;
                                     break;
                                 }
                             }
     
-                            if ($error == 0) {
-                                  /**
-                                     * 0 => Post Title
-                                     * 1 => Status
-                                     * 2 => Invitation Code
-                                     * 3 => Expiration Date
-                                     * 4 => Usage limit per user
-                                     * 5 => Select Contact Form 7
-                                     */
-                                for ($i=1; $i <=count($csv_data) ; $i++) { 
-                                    $post_title = (isset($csv_data[$i][0]) && !empty($csv_data[$i][0])) ? sanitize_text_field($csv_data[$i][0]) : '';                        
-                                    $invitation_code = (isset($csv_data[$i][2]) && !empty($csv_data[$i][2])) ? sanitize_text_field($csv_data[$i][2]) : '';                                        
-                                    $post_id = wp_insert_post( array(
-                                        'post_status' => 'publish',
-                                        'post_type' => 'cf7ic_invite_codes',
-                                        'post_title' => $post_title,
-                                    ) );
-                                    $cf7ic_plugin_status = (isset($csv_data[$i][1])) ? sanitize_text_field($csv_data[$i][1]) : '';
-                                    $expiration_date = (isset($csv_data[$i][3])) ? sanitize_text_field($csv_data[$i][3]) : '';
-                                    $number_times_used = (isset($csv_data[$i][4]) && $csv_data[$i][4] >= 0) ? intval($csv_data[$i][4]) : '';
-                                    if(isset($csv_data[$i][5]) && !empty($csv_data[$i][5])){
-                                        $contact_forms =  array();
-                                        $contact_forms = explode(",",$csv_data[$i][5]);
-                                        array_walk($contact_forms, function($value, $key) {
-                                            $value[$key] = sanitize_text_field($value[$key]);
-                                        });
-                                        update_post_meta($post_id, 'cf7ic_contact_forms', $contact_forms);
-                                    }
-                                    update_post_meta($post_id, 'cf7ic_plugin_status', $cf7ic_plugin_status);
-                                    update_post_meta($post_id, 'cf7ic_invitation_code', $invitation_code);
-                                    update_post_meta($post_id, 'cf7ic_expiration_date', strtotime($expiration_date));
-                                    update_post_meta($post_id, 'cf7ic_number_times_used', $number_times_used);
-                                }
+                            if ($cf7ic_error == 0) {
+                                $cf7ic_error = self::cf7ic_CreateCode($cf7ic_CSVdata); 
                             }
                         }
                         else{
-                            $error = 1;
+                            $cf7ic_error = 1;
                         }
                     }
                     else{
-                        $error = 1;
+                        $cf7ic_error = 1;
                     }
-                    if ($error == 1) {
-                        ?>
+
+                    if ($cf7ic_error == 1) {?>
                         <div class="error notice">
                             <p><?php esc_html_e('Some of the data missing in the file ', 'invitation-code-for-contact-form-7'); ?></p>
                         </div>
@@ -122,13 +115,52 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                 }
                 else{ ?>
                     <div class="error notice">
-                            <p><?php esc_html_e('Please Select File', 'invitation-code-for-contact-form-7'); ?></p>
+                            <p><?php esc_html_e('Please Upload File', 'invitation-code-for-contact-form-7'); ?></p>
                         </div>
                     <?php
                 }
             }
         }
-
+        static function cf7ic_CreateCode($cf7ic_CSVdata){
+                /**
+                 * 0 => Post Title
+                 * 1 => Status
+                 * 2 => Invitation Code
+                 * 3 => Expiration Date
+                 * 4 => Usage limit per user
+                 * 5 => Select Contact Form 7
+                 */
+            for ($i=1; $i <=count($cf7ic_CSVdata) ; $i++) { 
+                $post_title = (isset($cf7ic_CSVdata[$i][0]) && !empty($cf7ic_CSVdata[$i][0])) ? sanitize_text_field($cf7ic_CSVdata[$i][0]) : '';                        
+                $invitation_code = (isset($cf7ic_CSVdata[$i][2]) && !empty($cf7ic_CSVdata[$i][2])) ? sanitize_text_field($cf7ic_CSVdata[$i][2]) : '';                                        
+                $post_id = wp_insert_post( array(
+                    'post_status' => 'publish',
+                    'post_type' => 'cf7ic_invite_codes',
+                    'post_title' => $post_title,
+                ) );
+                if ($post_id) {     
+                    $cf7ic_plugin_status = (isset($cf7ic_CSVdata[$i][1])) ? sanitize_text_field($cf7ic_CSVdata[$i][1]) : '';
+                    $expiration_date = (isset($cf7ic_CSVdata[$i][3])) ? sanitize_text_field($cf7ic_CSVdata[$i][3]) : '';
+                    $number_times_used = (isset($cf7ic_CSVdata[$i][4]) && $cf7ic_CSVdata[$i][4] >= 0) ? intval($cf7ic_CSVdata[$i][4]) : '';
+                    if(isset($cf7ic_CSVdata[$i][5]) && !empty($cf7ic_CSVdata[$i][5])){
+                        $contact_forms =  array();
+                        $contact_forms = explode(",",$cf7ic_CSVdata[$i][5]);
+                        array_walk($contact_forms, function($value, $key) {
+                            $value[$key] = sanitize_text_field($value[$key]);
+                        });
+                        update_post_meta($post_id, 'cf7ic_contact_forms', $contact_forms);
+                    }
+                    update_post_meta($post_id, 'cf7ic_plugin_status', $cf7ic_plugin_status);
+                    update_post_meta($post_id, 'cf7ic_invitation_code', $invitation_code);
+                    update_post_meta($post_id, 'cf7ic_expiration_date', strtotime($expiration_date));
+                    update_post_meta($post_id, 'cf7ic_number_times_used', $number_times_used);
+                    return 0;
+                }
+                else{
+                    return 1;
+                }
+            }
+        }
 
         static function cf7ic_add_meta_box() {
             add_meta_box(
