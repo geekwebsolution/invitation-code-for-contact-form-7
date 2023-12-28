@@ -21,6 +21,7 @@ jQuery(document).ready(function(){
         $form.submit(function (e) {
 
             if (!(document.body.dataset.isICVSuccess === 'true' || document.body.dataset.isICVSuccess === true)) {
+                jQuery('#publishing-action .spinner').css('visibility', 'unset');
 
                 var form_data = $form.serializeArray();
 
@@ -33,6 +34,7 @@ jQuery(document).ready(function(){
                     },
                     success: function (data) {
                         data = JSON.parse(data);
+                        jQuery('#publishing-action .spinner').css('visibility', 'hidden');
 
                         if (data.status) {
                             jQuery('#cf7ic-error-notice').html(data.message).parent().show();
