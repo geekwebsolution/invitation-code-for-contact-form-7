@@ -2,16 +2,6 @@
 if(!class_exists('cf7ic_invitation_code_functions')){
     class cf7ic_invitation_code_functions{
 
-        /**
-         * define defult vairables values 
-         */
-        
-         //selected form values
-        public $cf7ic_selected_form_id = [];
-
-        // invitationcode for ajax validation
-        public $cf7ic_code             = '';
-
         public function __construct() {
             add_action( 'admin_enqueue_scripts', array('cf7ic_invitation_code_functions','cf7ci_enqueue_scripts'),30 );
             add_filter( 'manage_cf7ic_invite_codes_posts_columns', array('cf7ic_invitation_code_functions','insert_posts_columns'));
@@ -20,8 +10,11 @@ if(!class_exists('cf7ic_invitation_code_functions')){
             add_filter( 'wpcf7_validate_text*', array('cf7ic_invitation_code_functions','cf7ic_validate_field'), 50, 3);
             add_action( 'wpcf7_mail_sent', array('cf7ic_invitation_code_functions','cf7ic_after_mail_sent'));
             
-            add_action( 'wp_ajax_cf7ic_invitation_code_validation',array($this,'cf7ic_invitation_code_validation_callback'));
-            add_action( 'wp_ajax_nopriv_cf7ic_invitation_code_validation', array($this,'cf7ic_invitation_code_validation_callback'));
+            // add_action( 'wp_ajax_cf7ic_invitation_code_validation',array($this,'cf7ic_invitation_code_validation_callback'));
+            // add_action( 'wp_ajax_nopriv_cf7ic_invitation_code_validation', array($this,'cf7ic_invitation_code_validation_callback'));
+
+            add_action( 'wp_ajax_cf7ic_invitation_post_validation',array($this,'cf7ic_invitation_post_validation_callback'));
+            add_action( 'wp_ajax_nopriv_cf7ic_invitation_post_validation', array($this,'cf7ic_invitation_post_validation_callback'));
         }
 
         static function insert_posts_columns($columns){
@@ -232,27 +225,100 @@ if(!class_exists('cf7ic_invitation_code_functions')){
             wp_enqueue_style( 'cf7ic-datetimepicker-css', CF7IC_PLUGIN_URL . '/assets/css/jquery.datetimepicker.min.css', array(), CF7IC_BUILD );
             wp_enqueue_style( 'cf7ic-admin-style', CF7IC_PLUGIN_URL . '/assets/css/admin-style.css', array(), CF7IC_BUILD );
             wp_enqueue_script('cf7ic-datetimepicker-js', CF7IC_PLUGIN_URL . '/assets/js/jquery.datetimepicker.min.js', array(), CF7IC_BUILD );
-            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), CF7IC_BUILD );
+            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), time() );
             wp_localize_script('cf7ic-admin-js', 'cf7ic_custom_call', ['cf7ic_ajaxurl' => admin_url('admin-ajax.php')]);
         }
 
 
+        /**
+         * Callback function for handling CF7IC invitation code validation via AJAX.
+         */
+        public function cf7ic_invitation_post_validation_callback() {
+            // Initialize variables
+            $cf7ic_common = $cf7ic_invitation_Code_data = $cf7ic_response = array();
+            $cf7ic_response_message = 'Success';
+            $cf7ic_response_error_status = false;
 
+            // Retrieve form data from AJAX POST request
+            $cf7ic_posts_data = $_POST['cf7ic_posts_data'];
 
-        public function cf7ic_invitation_code_validation_callback(){
-            
-            echo '<pre>'; print_r(  get_the_ID()); echo '</pre>';
-            $this->cf7ic_selected_form_id = $_POST['cf7ic_selected_form_id'];
-            $this->cf7ic_code             = $_POST['cf7ic_code'];
-            
-            echo '<pre>'; print_r( $this->cf7ic_selected_form_id  ); echo '</pre>';
-            echo '<pre>'; print_r( $this->cf7ic_code ); echo '</pre>';
+            // Extract relevant information from form data
+            foreach ($cf7ic_posts_data as $cf7ic_post_data) {
+                if ($cf7ic_post_data['name'] ===  'post_ID') {
+                    $cf7ic_invitation_Code_data['cf7ic_current_post_id'] = $cf7ic_post_data['value'];
+                }
+                if ($cf7ic_post_data['name'] === 'cf7ic_invitation_code') {
+                    $cf7ic_invitation_Code_data['cf7ic_invitation_code'] = trim($cf7ic_post_data['value']);
+                }
+                if ($cf7ic_post_data['name'] === 'cf7ic_contact_forms[]') {
+                    $cf7ic_invitation_Code_data['cf7ic_contact_forms'][] = $cf7ic_post_data['value'];
+                }
+            }
 
+            // Check if required fields are not empty
+            if (isset($cf7ic_invitation_Code_data['cf7ic_invitation_code']) && !empty($cf7ic_invitation_Code_data['cf7ic_invitation_code'])
+                && isset($cf7ic_invitation_Code_data['cf7ic_contact_forms']) && !empty($cf7ic_invitation_Code_data['cf7ic_contact_forms'])) {
+
+                // Query to retrieve invitation posts with the provided code
+                $cf7ic_argc = array(
+                    'post_type'         => 'cf7ic_invite_codes',
+                    'post_status'       => 'publish',
+                    'posts_per_page'    => -1,
+                    'meta_query' => array(
+                        array(
+                            'key'       => 'cf7ic_invitation_code',
+                            'value'     => $cf7ic_invitation_Code_data['cf7ic_invitation_code'],
+                            'compare'   => '=',
+                        )
+                    )
+                );
+
+                // Execute the query
+                $cf7ic_invitation_posts = new WP_Query($cf7ic_argc);
+
+                // Check if there are invitation posts
+                if ($cf7ic_invitation_posts->have_posts()) {
+                    while ($cf7ic_invitation_posts->have_posts()) {
+                        $cf7ic_invitation_posts->the_post();
+
+                        // Skip the current post being edited
+                        if ((int)$cf7ic_invitation_Code_data['cf7ic_current_post_id'] == get_the_ID()) continue;
+
+                        // Get contact form IDs associated with the invitation post
+                        $cf7ic_contact_from_ids = get_post_meta(get_the_ID(), 'cf7ic_contact_forms', true);
+
+                        // Check for common contact forms
+                        if (!empty($cf7ic_contact_from_ids) && !empty($cf7ic_invitation_Code_data['cf7ic_contact_forms'])) {
+                            $cf7ic_common = array_intersect($cf7ic_invitation_Code_data['cf7ic_contact_forms'], $cf7ic_contact_from_ids);
+
+                            // If common contact forms are found, set error status and message
+                            if (!empty($cf7ic_common)) {
+                                $cf7ic_response_error_status    = true;
+                                $cf7ic_response_message         = 'Selected contact forms already have this invitation code set';
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Reset post data
+                wp_reset_postdata();
+            } else {
+                // Set error status and message for empty required fields
+                $cf7ic_response_error_status    = true;
+                $cf7ic_response_message         = 'Some required fields are empty';
+            }
+
+            // Prepare response array
+            $cf7ic_response = array(
+                'status'    => $cf7ic_response_error_status,
+                'message'   => $cf7ic_response_message,
+            );
+
+            // Send JSON-encoded response and terminate execution
+            echo json_encode($cf7ic_response);
             wp_die();
         }
-
-
-
 
     }
     new cf7ic_invitation_code_functions();

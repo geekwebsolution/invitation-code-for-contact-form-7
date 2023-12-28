@@ -1,3 +1,4 @@
+var isSuccess;
 jQuery(document).ready(function(){
     jQuery('.cf7ic-datepicker').datetimepicker({        
         format:'m/d/Y H:i',
@@ -11,47 +12,41 @@ jQuery(document).ready(function(){
         temp.val(jQuery('input[name="cf7ic_invitation_code"]').val()).select();
         document.execCommand("copy");
         temp.remove();
-        console.timeEnd('time1');
     });
 
-    var currentRequest = null;
-    jQuery(document).on("change", "input[name='cf7ic_invitation_code']", function(e){
-        e.preventDefault();
-        var cf7icCode = jQuery(this).val();
-        const cf7icselcectorContactForm = jQuery('#cf7ic_meta_box input[name="cf7ic_contact_forms[]"]');
-        const cf7icContactSelection = jQuery('#cf7ic_meta_box input[name="cf7ic_contact_forms[]"]:checked');
-       
-        if(cf7icContactSelection.length == 0){
-            cf7icselcectorContactForm.parent().find('.notice').show();
-            return false;
-        }else{
-            cf7icselcectorContactForm.parent().find('.notice').hide();
-        }
 
-        const cf7icSelectedFormsId = [];
-        cf7icContactSelection.each((i) => {
-            cf7icSelectedFormsId.push(cf7icContactSelection[i].value);
-        });
- 
-        currentRequest = jQuery.ajax({
-            type: 'POST',
-            url: cf7ic_custom_call.cf7ic_ajaxurl,
-            data: {
-                'action': 'cf7ic_invitation_code_validation',
-                'cf7ic_code': cf7icCode,
-                'cf7ic_selected_form_id': cf7icSelectedFormsId
-            },
-            success: function (data) {
-                console.log(data);
-            }
- 
-        });    
-
-
-
+    if (jQuery("body").hasClass("post-type-cf7ic_invite_codes")) {
+        var $form = jQuery('#post');
         
-    });
+        $form.submit(function (e) {
 
+            if (!(document.body.dataset.isICVSuccess === 'true' || document.body.dataset.isICVSuccess === true)) {
 
+                var form_data = $form.serializeArray();
+
+                jQuery.ajax({
+                    type: 'POST',
+                    url: cf7ic_custom_call.cf7ic_ajaxurl,
+                    data: {
+                        'action': 'cf7ic_invitation_post_validation',
+                        'cf7ic_posts_data': form_data,
+                    },
+                    success: function (data) {
+                        data = JSON.parse(data);
+
+                        if (data.status) {
+                            jQuery('#cf7ic-error-notice').html(data.message).parent().show();
+                        } else {
+                            document.body.dataset.isICVSuccess = true;
+                            $form.submit();
+                            return;
+                        }
+                    }
+                });
+
+                e.preventDefault();
+            }
+        });
+    }
 
 });
