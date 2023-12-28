@@ -155,5 +155,9 @@ input.cf7ic-checkbox:checked+.cf7ic-slider:before {
 #cf7ic_meta_box .cf7ic-notice {
     font-size: 1em;
     color: #dc3232;
-    margin: 0;
+    margin: 5px 0 0 0;
+}
+
+#cf7ic_meta_box input[type="checkbox"] {
+    vertical-align: bottom;
 }

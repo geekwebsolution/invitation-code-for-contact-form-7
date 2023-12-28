@@ -223,9 +223,9 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
         static function cf7ci_enqueue_scripts(){
             wp_enqueue_style( 'cf7ic-datetimepicker-css', CF7IC_PLUGIN_URL . '/assets/css/jquery.datetimepicker.min.css', array(), CF7IC_BUILD );
-            wp_enqueue_style( 'cf7ic-admin-style', CF7IC_PLUGIN_URL . '/assets/css/admin-style.css', array(), CF7IC_BUILD );
+            wp_enqueue_style( 'cf7ic-admin-style', CF7IC_PLUGIN_URL . '/assets/css/admin-style.css', array(), time() );
             wp_enqueue_script('cf7ic-datetimepicker-js', CF7IC_PLUGIN_URL . '/assets/js/jquery.datetimepicker.min.js', array(), CF7IC_BUILD );
-            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), CF7IC_BUILD );
+            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), time() );
             wp_localize_script('cf7ic-admin-js', 'cf7ic_custom_call', ['cf7ic_ajaxurl' => admin_url('admin-ajax.php')]);
         }
 
@@ -289,7 +289,7 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
                         // Check for common contact forms
                         if (!empty($cf7ic_contact_from_ids) && !empty($cf7ic_invitation_Code_data['cf7ic_contact_forms'])) {
-
+                            
                             $cf7ic_common = array_intersect($cf7ic_invitation_Code_data['cf7ic_contact_forms'], $cf7ic_contact_from_ids);
 
                             // If common contact forms are found, set error status and message
