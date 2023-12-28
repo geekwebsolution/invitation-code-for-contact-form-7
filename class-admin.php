@@ -65,7 +65,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                             }
                             ?>
                             <p class="note"><i><?php esc_html_e('Select contact form 7 for this code.','invitation-code-for-contact-form-7'); ?></i></p>
-                            <p class="notice" style="display: none;"><i></i></p>
+                            <p class="cf7ic-contact-forms-notice cf7ic-notice" style="display: none;"></p>
                         </div>
                     </td>
                 </tr>
@@ -78,7 +78,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                                 <span class="cf7ic-copy-to-clipboard"> <span class="cf7ic-copy-text">Copy Text</span> <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="20" height="20" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path xmlns="http://www.w3.org/2000/svg" d="m186.667969 416c-49.984375 0-90.667969-40.683594-90.667969-90.667969v-218.664062h-37.332031c-32.363281 0-58.667969 26.300781-58.667969 58.664062v288c0 32.363281 26.304688 58.667969 58.667969 58.667969h266.664062c32.363281 0 58.667969-26.304688 58.667969-58.667969v-37.332031zm0 0" fill="#1976d2" data-original="#1976d2" class=""></path><path xmlns="http://www.w3.org/2000/svg" d="m469.332031 58.667969c0-32.40625-26.261719-58.667969-58.664062-58.667969h-224c-32.40625 0-58.667969 26.261719-58.667969 58.667969v266.664062c0 32.40625 26.261719 58.667969 58.667969 58.667969h224c32.402343 0 58.664062-26.261719 58.664062-58.667969zm0 0" fill="#2196f3" data-original="#2196f3" class=""></path></g></svg></span>
                             </div>
                             <p class="note"><i><?php esc_html_e('Enter invitation code which you want to apply.','invitation-code-for-contact-form-7'); ?></i></p>
-                            
+                            <p class="cf7ic-invitation-code-notice cf7ic-notice" style="display: none;"></p>
                             
                         </div>
                     </td>

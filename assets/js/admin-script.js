@@ -23,6 +23,17 @@ jQuery(document).ready(function(){
             if (!(document.body.dataset.isICVSuccess === 'true' || document.body.dataset.isICVSuccess === true)) {
                 jQuery('#publishing-action .spinner').css('visibility', 'unset');
 
+                var cf7icInvitationCode = jQuery("input[name='cf7ic_invitation_code']");
+                var cf7icContactForms   = jQuery("input[name='cf7ic_contact_forms[]']");
+
+                (cf7icContactForms.is(":checked")) 
+                ? cf7icContactForms.removeClass('cf7ic-error').siblings('.cf7ic-contact-forms-notice').hide() 
+                : cf7icContactForms.addClass('cf7ic-error').siblings('.cf7ic-contact-forms-notice').show().html('Please fill out this field.');
+
+                (cf7icInvitationCode.val() == '')
+                ? cf7icInvitationCode.addClass('cf7ic-error').parent().siblings('.cf7ic-invitation-code-notice').show().html('Please fill out this field.') 
+                : cf7icInvitationCode.removeClass('cf7ic-error').parent().siblings('.cf7ic-invitation-code-notice').hide();
+                
                 var form_data = $form.serializeArray();
 
                 jQuery.ajax({
@@ -47,6 +58,7 @@ jQuery(document).ready(function(){
                 });
 
                 e.preventDefault();
+                
             }
         });
     }

@@ -147,3 +147,13 @@ input.cf7ic-checkbox:checked+.cf7ic-slider:before {
     top: -40px;
     opacity: 1;
 }
+
+#cf7ic_meta_box input.cf7ic-error {
+    border: 1.5px solid #dc3232;
+}
+
+#cf7ic_meta_box .cf7ic-notice {
+    font-size: 1em;
+    color: #dc3232;
+    margin: 0;
+}
