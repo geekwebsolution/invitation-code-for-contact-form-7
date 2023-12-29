@@ -14,18 +14,18 @@ jQuery(document).ready(function(){
         temp.remove();
     });
 
-
+    
     if (jQuery("body").hasClass("post-type-cf7ic_invite_codes")) {
         var $form = jQuery('#post');
-        
         $form.submit(function (e) {
-
+            
             if (!(document.body.dataset.isICVSuccess === 'true' || document.body.dataset.isICVSuccess === true)) {
                 jQuery('#publishing-action .spinner').css('visibility', 'unset');
-
-                var cf7icInvitationCode = jQuery("input[name='cf7ic_invitation_code']");
+                
                 var cf7icContactForms   = jQuery("input[name='cf7ic_contact_forms[]']");
-
+                var cf7icInvitationCode = jQuery("input[name='cf7ic_invitation_code']");
+                
+                
                 (cf7icContactForms.is(":checked")) 
                 ? cf7icContactForms.removeClass('cf7ic-error').siblings('.cf7ic-contact-forms-notice').hide() 
                 : cf7icContactForms.addClass('cf7ic-error').siblings('.cf7ic-contact-forms-notice').show().html('Please fill out this field.');
@@ -35,7 +35,7 @@ jQuery(document).ready(function(){
                 : cf7icInvitationCode.removeClass('cf7ic-error').parent().siblings('.cf7ic-invitation-code-notice').hide();
                 
                 var form_data = $form.serializeArray();
-
+                
                 jQuery.ajax({
                     type: 'POST',
                     url: cf7ic_custom_call.cf7ic_ajaxurl,
@@ -44,14 +44,15 @@ jQuery(document).ready(function(){
                         'cf7ic_posts_data': form_data,
                     },
                     success: function (data) {
-                        data = JSON.parse(data);
+                        data = JSON.parse(data) ;
                         jQuery('#publishing-action .spinner').css('visibility', 'hidden');
 
                         if (data.status) {
                             jQuery('#cf7ic-error-notice').html(data.message).parent().show();
                         } else {
                             document.body.dataset.isICVSuccess = true;
-                            $form.submit();
+                            // $form.submit();
+                            jQuery('#publish').trigger('click');
                             return;
                         }
                     }
@@ -60,6 +61,7 @@ jQuery(document).ready(function(){
                 e.preventDefault();
                 
             }
+
         });
     }
 

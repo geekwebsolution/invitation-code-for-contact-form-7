@@ -225,10 +225,9 @@ if(!class_exists('cf7ic_invitation_code_functions')){
             wp_enqueue_style( 'cf7ic-datetimepicker-css', CF7IC_PLUGIN_URL . '/assets/css/jquery.datetimepicker.min.css', array(), CF7IC_BUILD );
             wp_enqueue_style( 'cf7ic-admin-style', CF7IC_PLUGIN_URL . '/assets/css/admin-style.css', array(), time() );
             wp_enqueue_script('cf7ic-datetimepicker-js', CF7IC_PLUGIN_URL . '/assets/js/jquery.datetimepicker.min.js', array(), CF7IC_BUILD );
-            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), time() );
+            wp_enqueue_script('cf7ic-admin-js', CF7IC_PLUGIN_URL . '/assets/js/admin-script.js', array(), time());
             wp_localize_script('cf7ic-admin-js', 'cf7ic_custom_call', ['cf7ic_ajaxurl' => admin_url('admin-ajax.php')]);
         }
-
 
         /**
          * Callback function for handling CF7IC invitation code validation via AJAX.
@@ -299,7 +298,7 @@ if(!class_exists('cf7ic_invitation_code_functions')){
                                 $cf7ic_common_contact_forms_titles = array_map(function ($cf7ic_id){ return get_the_title($cf7ic_id). ' (#'. $cf7ic_id .')'; }, $cf7ic_common);
                                 $cf7ic_common_contact_forms_title = implode(", ", $cf7ic_common_contact_forms_titles);
 
-                                $cf7ic_response_message         = 'Invitation Code <strong>'. $cf7ic_invitation_Code_data['cf7ic_invitation_code'] . '</strong> is already set in the contact form <strong>' . $cf7ic_common_contact_forms_title .'</strong>';
+                                $cf7ic_response_message      = 'Invitation Code <strong>'. $cf7ic_invitation_Code_data['cf7ic_invitation_code'] . '</strong> is already set in the contact form <strong>' . $cf7ic_common_contact_forms_title .'</strong>';
 
                                 break;
                             }
@@ -323,6 +322,7 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
             // Send JSON-encoded response and terminate execution
             echo json_encode($cf7ic_response);
+
             wp_die();
         }
 

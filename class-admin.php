@@ -29,7 +29,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             $number_times_used = get_post_meta($post->ID, 'cf7ic_number_times_used', true);
             $contact_forms = get_post_meta($post->ID, 'cf7ic_contact_forms', true);
             if(isset($expiration_timestamp) && !empty($expiration_timestamp)) $expiration_date = date('m/d/Y H:i', $expiration_timestamp);
-            (isset($contact_forms) && !empty($contact_forms)) ? $cf7ic_contact_forms = $contact_forms : $cf7ic_contact_forms = array();
+            $cf7ic_contact_forms = (isset($contact_forms) && !empty($contact_forms)) ? $contact_forms : array();
             ?>
             <div id="message" class="notice notice-error" style="display: none;">
                 <p id="cf7ic-error-notice"></p>
@@ -112,13 +112,13 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
         static function cf7ic_save_meta($post_id){
             // Check if this is an autosave
             if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-
+            
             // Check if the user has permission to edit the post
             if (!current_user_can('edit_post', $post_id)) return;
-
+            
             // Verify the nonce if using one
             if (isset($_POST['cf7ic_metadata_nonce']) && !wp_verify_nonce($_POST['cf7ic_metadata_nonce'], 'cf7ic_metadata_nonce_action')) return;
-
+            
             // Check if it's the correct post type
             if ('cf7ic_invite_codes' !== get_post_type($post_id)) return;
             
@@ -126,16 +126,16 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                 $cf7ic_invitation_code = sanitize_text_field($_POST['cf7ic_invitation_code']);
                 update_post_meta($post_id, 'cf7ic_invitation_code', $cf7ic_invitation_code);
             }
-
+            
             if((isset($_POST['cf7ic_contact_forms']) && !empty($_POST['cf7ic_contact_forms']))){
                 $cf7ic_contact_forms = $_POST['cf7ic_contact_forms'];
                 update_post_meta($post_id, 'cf7ic_contact_forms', $cf7ic_contact_forms);
             }
-
+            
             $cf7ic_plugin_status = (isset($_POST['cf7ic_plugin_status'])) ? sanitize_text_field($_POST['cf7ic_plugin_status']) : '';
             $expiration_date = (isset($_POST['cf7ic_expiration_date'])) ? sanitize_text_field($_POST['cf7ic_expiration_date']) : '';
             $number_times_used = (isset($_POST['cf7ic_number_times_used']) && $_POST['cf7ic_number_times_used'] >= 0) ? intval($_POST['cf7ic_number_times_used']) : '';
-           
+            
             update_post_meta($post_id, 'cf7ic_plugin_status', $cf7ic_plugin_status);
             update_post_meta($post_id, 'cf7ic_expiration_date', strtotime($expiration_date));
             update_post_meta($post_id, 'cf7ic_number_times_used', $number_times_used);
@@ -252,7 +252,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                 'labels' => array(
                     'name' => __('Invitation Codes','invitation-code-for-contact-form-7'),
                     'singular_name' => __('Invitation Codes','invitation-code-for-contact-form-7'),
-                    'add_new' => __('Add New Code','invitation-code-for-contact-form-7'),
+                    'add_new' => __('Add  Invitation Code','invitation-code-for-contact-form-7'),
                     'edit_item' => __('Edit Invitation Code','invitation-code-for-contact-form-7'),
                     'new_item' => __('New Code','invitation-code-for-contact-form-7'),
                 ),

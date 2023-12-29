@@ -3,14 +3,14 @@
 Plugin Name: Invitation Code For Contact Form 7
 Description: Create an invitation code for users with contact form 7 to get the confirmed subscribers.
 Author: Geek Code Lab
-Version: 1.6
+Version: 1.7
 Author URI: https://geekcodelab.com/
 Text Domain : invitation-code-for-contact-form-7
 */
 
 if (!defined('ABSPATH')) exit;
 
-define('CF7IC_BUILD',1.6);
+define('CF7IC_BUILD',1.7);
 
 if (!defined( 'CF7IC_PLUGIN_DIR_PATH' ))
 	define( 'CF7IC_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__) );
