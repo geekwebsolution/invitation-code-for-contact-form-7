@@ -109,74 +109,6 @@ if(!class_exists('cf7ic_invitation_code_functions')){
             return $cf7ic_posts;
         }
 
-        // checks code status and selected any form or not 
-        static function cf7ci_validation_check($form_id, $invitation_code){
-            $cur_time = time();
-            
-            $cf7ic_validation_args = array(
-                'post_type'     => 'cf7ic_invite_codes',
-                'post_status'   => 'publish',
-                'posts_per_page'   => -1,
-                'meta_query'    => array(
-                    'relation'  => 'AND',
-                    array(
-                        'relation' => 'OR',
-                        array(
-                            'key'     => 'cf7ic_plugin_status',
-                            'value'   => '',
-                            'compare' => '='
-                        ),
-                        array(
-                            'key'     => 'cf7ic_contact_forms',
-                            'value'   => $form_id,
-                            'compare' => 'NOT LIKE'
-                        )
-                    ),
-                    array(
-                        'relation' => 'OR',
-                        array(
-                            'key'     => 'cf7ic_invitation_code',
-                            'value'   => '',
-                            'compare' => '!='
-                        ),
-                        array(
-                            'key'     => 'cf7ic_invitation_code',
-                            'value'   => $invitation_code,
-                            'compare' => '='
-                        )
-                    ),
-                    array(
-                        'relation' => 'OR',
-                        array(
-                            'key'     => 'cf7ic_expiration_date',
-                            'value'   =>  $cur_time,
-                            'compare' => '>='
-                        ),
-                        array(
-                            'key'     => 'cf7ic_expiration_date',
-                            'value'   => '',
-                            'compare' => '='
-                        )
-                    ),
-                    array(
-                        'relation' => 'OR',
-                        array(
-                            'key'     => 'cf7ic_number_times_used',
-                            'value'   => 0,
-                            'compare' => '>'
-                        ),
-                        array(
-                            'key'     => 'cf7ic_number_times_used',
-                            'value'   => '',
-                            'compare' => '='
-                        )
-                    )
-                )
-            );
-            $cf7ic_validation_posts = get_posts($cf7ic_validation_args);
-
-            return $cf7ic_validation_posts;
-        }
 
         static function cf7ic_after_mail_sent($contact_form){
             $form_id = $contact_form->id();
@@ -207,15 +139,11 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
             if(isset( $_POST['invitation-code'] ) && 'invitation-code' == $tag->name ){
                 $cf7ci_posts = cf7ic_invitation_code_functions::cf7ci_post_count($form_id, $invitation_code);
-                $cf7ic_validation_posts = cf7ic_invitation_code_functions::cf7ci_validation_check($form_id, $invitation_code);
                 
                 $count_posts = wp_count_posts('cf7ic_invite_codes')->publish;   // count total posts
                 if(!empty($count_posts) && isset($cf7ci_posts) && empty($cf7ci_posts)){
+                    $result->invalidate( $tag, "Enter valid invitation code." );
                     
-                    
-                    if(isset($cf7ic_validation_posts) && empty($cf7ic_validation_posts)){
-                        $result->invalidate( $tag, "Enter valid invitation code." );
-                    }
                 }
             }
             return $result;

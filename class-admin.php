@@ -5,8 +5,7 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
         public function __construct() {
             add_action( 'init', array( $this,'cf7ic_custom_post_type' ));
             add_action( 'add_meta_boxes', array( $this,'cf7ic_add_meta_box' ));
-            add_action( 'save_post', array( $this, 'cf7ic_save_meta' ));
-            // add_action( 'save_post_cf7ic_invite_codes', array( $this, 'cf7ic_save_meta' ));
+            add_action( 'save_post_cf7ic_invite_codes', array( $this, 'cf7ic_save_meta' ));
             add_action( 'wpcf7_init', array( $this,'cf7ic_add_form_tag' ), 36, 0 );
         }
 
