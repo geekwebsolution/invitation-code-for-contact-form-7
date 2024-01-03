@@ -19,7 +19,7 @@ if (!defined( 'CF7IC_PLUGIN_URL' ))
 	define( 'CF7IC_PLUGIN_URL', plugins_url() . '/' . basename(dirname(__FILE__)) );
 
 
-add_action( 'plugins_loaded', 'cf7ic_plugin_load' );
+add_action( 'admin_init', 'cf7ic_plugin_load' );
 
 function cf7ic_plugin_load(){
 	if ( ! ( is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) ) {
