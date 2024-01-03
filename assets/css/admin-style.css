@@ -99,7 +99,7 @@ input.cf7ic-checkbox:checked+.cf7ic-slider:before {
     font-weight: 500;
 }
 
-.cf7ic-expiration-date span.cf7ic-red {
+.cf7ic-expiration-date span.cf7ic-red, .cf7ic-selected-form span.cf7ic-red {
     color: red;
     font-weight: 500;
 }

@@ -19,6 +19,7 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
         static function insert_posts_columns($columns){
             $columns['cf7ic-invitation-code'] = __( 'Invitation Code', 'invitation-code-for-contact-form-7' );
+            $columns['cf7ic-selected-form'] = __( 'Selected Contact Form 7', 'invitation-code-for-contact-form-7' );
             $columns['cf7ic-expiration-date'] = __( 'Expiration', 'invitation-code-for-contact-form-7' );
             $columns['cf7ic-remaining-amt'] = __( 'Remaining Amount', 'invitation-code-for-contact-form-7' );
             return $columns;
@@ -27,19 +28,52 @@ if(!class_exists('cf7ic_invitation_code_functions')){
         static function insert_post_type_custom_columns($column){
             global $post;
             if('cf7ic-invitation-code' == $column){
-                $invitation_code = get_post_meta($post->ID, 'cf7ic_invitation_code', true);
-                if(isset($invitation_code) && !empty($invitation_code)){
-                    printf('<span>%1$s</span>',$invitation_code);
+                $cf7ic_invitation_code = get_post_meta($post->ID, 'cf7ic_invitation_code', true);
+                if(isset($cf7ic_invitation_code) && !empty($cf7ic_invitation_code)){
+                    printf('<span>%1$s</span>',$cf7ic_invitation_code);
                 }
             }
-            if('cf7ic-expiration-date' == $column){
-                $expiration_timestamp = get_post_meta($post->ID, 'cf7ic_expiration_date', true);
-                if(isset($expiration_timestamp) && !empty($expiration_timestamp)) $expiration_date = date('m/d/Y H:i', $expiration_timestamp);
-                if(isset($expiration_date) && !empty($expiration_date)){
-                    printf('<span>%1$s</span>',$expiration_date);
-                }elseif(empty($expiration_date)){
+            if('cf7ic-selected-form' == $column){
+                $cf7ic_selected_form = get_post_meta($post->ID, 'cf7ic_contact_forms', true);
+                if(isset($cf7ic_selected_form) && !empty($cf7ic_selected_form)){
+                    $cf7ic_selected_form_ids = array_filter( array_map(function ($cf7ic_id){
+                        if ( 'publish' === get_post_status( $cf7ic_id ) ) { 
+                            return get_the_title($cf7ic_id). ' (#'. $cf7ic_id .')'; 
+                        }
+                    }, $cf7ic_selected_form));
+
+                    // $cf7ic_selected_form_ids =  array_filter($cf7ic_selected_form_ids);
+
+                    if(!empty($cf7ic_selected_form_ids)){
+                        $cf7ic_selected_form_title = implode(", ", $cf7ic_selected_form_ids);
+                        printf('<span>%1$s</span>', $cf7ic_selected_form_title);
+
+                    }else{
+                        printf('<span>%1$s</span>', __('-','invitation-code-for-contact-form-7'));
+                    }
+                }else{
                     printf('<span class="cf7ic-red">%1$s</span>',__('Not Set','invitation-code-for-contact-form-7'));
                 }
+            }
+
+            if('cf7ic-expiration-date' == $column){
+                $expiration_timestamp = get_post_meta($post->ID, 'cf7ic_expiration_date', true);
+                
+                if(isset($expiration_timestamp) && !empty($expiration_timestamp)){
+                    $expiration_date = (isset($expiration_timestamp) && !empty($expiration_timestamp))? date('m/d/Y H:i', $expiration_timestamp) : '';
+
+                    if((time() > $expiration_timestamp)){
+                        printf('<span class="cf7ic-red">%1$s</span><span> (%2$s)</span>', __('Expired','invitation-code-for-contact-form-7'), $expiration_date);
+                    }else{
+                        if(isset($expiration_date) && !empty($expiration_date)){
+                            printf('<span>%1$s</span>',$expiration_date);
+
+                        }
+                    }
+                }else{
+                    printf('<span class="cf7ic-red">%1$s</span>',__('Not Set','invitation-code-for-contact-form-7'));
+                }
+            
             }
             if('cf7ic-remaining-amt' == $column){
                 $remaining_amt = get_post_meta($post->ID, 'cf7ic_number_times_used', true);
@@ -116,20 +150,24 @@ if(!class_exists('cf7ic_invitation_code_functions')){
 
             if ( $submission ) {
                 $posted_data = $submission->get_posted_data();
-                $invitation_code = sanitize_text_field($_POST['invitation-code']);
 
-                if(isset($invitation_code) && !empty($invitation_code) && isset($form_id) && !empty($form_id)){
-                    $cf7ci_posts = cf7ic_invitation_code_functions::cf7ci_post_count($form_id, $invitation_code);
+                if(!empty($posted_data) && array_key_exists('invitation-code', $posted_data)){
+                    $invitation_code = sanitize_text_field($posted_data['invitation-code']);
 
-                    if(isset($cf7ci_posts) && !empty($cf7ci_posts)){
-                        $post_id = $cf7ci_posts[0]->ID;
-                        $remaining_amt = get_post_meta($post_id, 'cf7ic_number_times_used', true);
-                        
-                        if($remaining_amt != ''){
-                            update_post_meta($post_id, 'cf7ic_number_times_used', --$remaining_amt);
+                    if(isset($invitation_code) && !empty($invitation_code) && isset($form_id) && !empty($form_id)){
+                        $cf7ci_posts = cf7ic_invitation_code_functions::cf7ci_post_count($form_id, $invitation_code);
+    
+                        if(isset($cf7ci_posts) && !empty($cf7ci_posts)){
+                            $post_id = $cf7ci_posts[0]->ID;
+                            $remaining_amt = get_post_meta($post_id, 'cf7ic_number_times_used', true);
+                            
+                            if($remaining_amt != ''){
+                                update_post_meta($post_id, 'cf7ic_number_times_used', --$remaining_amt);
+                            }
                         }
                     }
                 }
+
             }       
         }
 
