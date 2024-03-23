@@ -1,5 +1,5 @@
 jQuery(document).ready(function(){
-    jQuery('.cf7ic-datepicker').datetimepicker({        
+    jQuery('.cf7ic-datepicker').datetimepicker({
         format:'m/d/Y H:i',
         minDate:new Date()
     });
@@ -12,9 +12,12 @@ jQuery(document).ready(function(){
         temp.remove();
     });
     
+    /** validation for add / update invitation code submit event  */
     var cf7icinitial = true;
-    
     if (jQuery("body").hasClass("post-type-cf7ic_invite_codes")) {
+        /**
+         * Validation when user add new invite code or updating code
+         */
         var $form = jQuery('#post');
         $form.submit(function (e) {
             
@@ -77,5 +80,45 @@ jQuery(document).ready(function(){
 
         });
     }
+
+    // when user submits the form
+    jQuery('body').on("submit", "#upload_csv_form", function(event){
+
+        var error_elm = jQuery('.ajax-error');
+        var response_elm = jQuery('.ajax-response');
+        error_elm.html('');
+        response_elm.html('');
+
+        event.preventDefault();
+
+        var form_elm = jQuery(this);
+
+        var url = form_elm.data('url');
+        var action = form_elm.data('action');
+        var file_input_name = jQuery('#upload_csv_form').find('input[type=file]').attr('id');
+        var form_data = new FormData();
+
+        form_data.append('action', action);
+
+        jQuery.each(jQuery(':input:not([type=submit]):not([type=text]):not([type=select])', '#upload_csv_form' )[0].files, function(i, file){
+            console.log("Debug");
+            form_data.append(file_input_name, file);
+        });
+
+        response_elm.html('Loading...');
+
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            data: form_data,
+            processData: false,
+            contentType: false,
+            cache: false
+        }).success(function (response) {
+
+            console.log(response);
+
+        });
+    });
 
 });

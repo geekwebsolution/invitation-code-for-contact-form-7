@@ -7,6 +7,52 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
             add_action( 'add_meta_boxes', array( $this,'cf7ic_add_meta_box' ));
             add_action( 'save_post_cf7ic_invite_codes', array( $this, 'cf7ic_save_meta' ));
             add_action( 'wpcf7_init', array( $this,'cf7ic_add_form_tag' ), 36, 0 );
+            add_action( 'admin_head-edit.php', array( $this, 'cf7ic_addCustomImportButton' ));
+
+            add_action( 'wp_ajax_cf7ic_import_csv_codes', array( $this, 'cf7ic_import_csv_codes' ));
+            add_action( 'wp_ajax_nopriv_cf7ic_import_csv_codes', array( $this, 'cf7ic_import_csv_codes' ) );
+        }
+
+        static function cf7ic_addCustomImportButton() {
+            global $current_screen;
+            $cf7ic_post_type_slug = 'cf7ic_invite_codes';
+            if ($cf7ic_post_type_slug != $current_screen->post_type)    return;
+
+            $cf7ic_sample_file_path = CF7IC_PLUGIN_URL.'/assets/samples/cf7ic_invite_codes_imports.csv'; 
+            $cf7ic_form_args = array('post_type' => 'wpcf7_contact_form', 'posts_per_page' => -1,'post_status'=>'published','orderby'=> 'title','order'=> 'ASC');
+            $cf7ic_cf7Forms = get_posts( $cf7ic_form_args );
+
+            $cf7ic_cf7FormsHTML  = 'You not have any Contact form. Please add contact forms.';
+            if (!empty($cf7ic_cf7Forms)) {
+                $i = 1;
+                $cf7ic_cf7FormsHTML = '<ul>';
+                foreach($cf7ic_cf7Forms as $key => $value){ $cf7ic_cf7FormsHTML .= "<li>$i. $value->post_title (#$value->ID)</li>"; $i++; }
+                $cf7ic_cf7FormsHTML .= '</ul>';
+            } ?>
+                <script type="text/javascript">
+                    jQuery(document).ready( function($)
+                    {
+                        jQuery('hr.wp-header-end').before("<a  id='cf7ic_ImportData' class='cf7ic_page-title-action page-title-action'><?php esc_html_e('Import', 'invitation-code-for-contact-form-7')?></a>");
+                        jQuery('body').on('click','#cf7ic_ImportData',function () { 
+                            var cf7ic_cf7FormsHTML = '<?php _e($cf7ic_cf7FormsHTML) ?>';
+                            if (cf7ic_cf7FormsHTML == '') {
+                                jQuery("<div class='error notice'><p><?php esc_html_e('Make sure you have a contact form for importing codes.', 'invitation-code-for-contact-form-7')?></p></div>").insertAfter('#cf7ic_ImportData');
+                            }
+                            else{
+                                var cf7ic_file_upload_html = '';
+                                cf7ic_file_upload_html = "<div class='cf7ic_upload-file-section'>";
+                                    cf7ic_file_upload_html += "<h2><?php esc_html_e('Upload File','invitation-code-for-contact-form-7'); ?></h2>";
+                                    cf7ic_file_upload_html += "<p class='cf7ic_note'><?php esc_html_e('Please download Sample CSV File','invitation-code-for-contact-form-7'); ?> <a href='<?php esc_attr_e($cf7ic_sample_file_path);   ?>'><?php esc_html_e('Sample','invitation-code-for-contact-form-7'); ?></a></p>";
+                                    cf7ic_file_upload_html += "<p>Here is list of contact form"+cf7ic_cf7FormsHTML+ "</p>";
+                                    cf7ic_file_upload_html += "<h2><?php esc_html_e('Please upload the completed CSV spreadsheet file.','invitation-code-for-contact-form-7'); ?></h2>";
+                                    cf7ic_file_upload_html += "<div class='ajax-error' style='color:red;'></div><div class='cf7ic-progressbar'><span id='cf7ic_process_data'>0</span> - <span id='cf7ic_total_data'>0</span></div><form id='upload_csv_form' method='POST' enctype='multipart/form-data' data-url='<?php echo esc_url(admin_url('admin-ajax.php')) ?>' data-action='cf7ic_import_csv_codes'><input type='file' name='cf7ic_imported_csv' accept='.csv' id='cf7ic_imported_csv' multiple='false' /><input type='submit' id='cf7ic_import_btn' value='<?php esc_html_e('Import','invitation-code-for-contact-form-7'); ?>' name='cf7ic_import_csv' /></form>";
+                                cf7ic_file_upload_html += '</div>';
+                                if(jQuery(".cf7ic_upload-file-section").length == 0) {  jQuery(cf7ic_file_upload_html).insertAfter('#cf7ic_ImportData'); }
+                            }
+                        });
+                    });
+                </script>
+            <?php
         }
 
         static function cf7ic_add_meta_box() {
@@ -264,6 +310,54 @@ if(!class_exists('cf7ic_invitation_codes_settings')){
                 'exclude_from_search' => true,
                 'supports' => array('title')
             ) );
+        }
+
+        public function cf7ic_import_csv_codes() {
+            $response = array(
+                'status' => 'error',
+                'message' => '',
+            );
+
+            parse_str($_POST['form_data'], $form_data);
+
+            echo '<pre>'; print_r( $form_data ); echo '</pre>';
+
+            $error = new WP_Error();
+
+            if (empty($_POST['cf7ic_imported_csv']) && empty($_FILES["cf7ic_imported_csv"]["name"])) {
+                $error->add('empty','select an file.');
+            }
+
+            if ( !empty( $error->get_error_codes() ) ) {
+                $error_messages = $error->get_error_messages();
+
+                $error = '';
+                foreach($error_messages as $error_message) {
+                    $error .= '<p>'.$error_message.'</p>';
+                }
+
+                $response['message'] = $error;
+
+                wp_send_json( $response );
+                wp_die();
+            }
+
+            $uploaded_file = $_FILES['cf7ic_imported_csv'];
+
+            echo '<pre>'; print_r( $uploaded_file ); echo '</pre>';
+
+            $file = fopen($uploaded_file["tmp_name"],"r");
+            
+            // read CSV file using comma as delimiter
+            while (! feof($file)) {
+                $csvArray[] = fgetcsv($file, 1000, ',');
+            }
+
+            fclose($file);
+
+            echo '<pre>'; print_r( $csvArray ); echo '</pre>';
+
+            die;
         }
     }
     new cf7ic_invitation_codes_settings();

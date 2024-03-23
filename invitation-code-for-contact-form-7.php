@@ -34,25 +34,27 @@ function cf7ic_install_contact_form_7_admin_notice(){ ?>
 		<p>
 			<?php
 			// translators: %s is the plugin name.
-			echo esc_html( sprintf( __( '%s is enabled but not effective. It requires Contact Form 7 in order to work.', 'Invitation Code For Contact Form 7' ), 'invitation-code-for-contact-form-7' ) );
+			echo esc_html__( sprintf( '%s is enabled but not effective. It requires Contact Form 7 in order to work.', 'Invitation Code For Contact Form 7' ), 'invitation-code-for-contact-form-7' );
 			?>
 		</p>
 	</div>
 	<?php
-
-}
-
-$plugin = plugin_basename(__FILE__);
-add_filter( "plugin_action_links_$plugin", 'cf7ic_add_plugin_link');
-function cf7ic_add_plugin_link( $links ) {
-	$support_link = '<a href="https://geekcodelab.com/contact/" target="_blank" >' . __( 'Support', 'invitation-code-for-contact-form-7' ) . '</a>';
-	array_unshift( $links, $support_link );
-	
-	$setting_link = '<a href="'. admin_url('edit.php?post_type=cf7ic_invite_codes') .'">' . __( 'Settings', 'invitation-code-for-contact-form-7' ) . '</a>';
-	array_unshift( $links, $setting_link );
-
-	return $links;
 }
     
 require_once(CF7IC_PLUGIN_DIR_PATH . 'functions.php');
 require_once(CF7IC_PLUGIN_DIR_PATH . 'class-admin.php');
+
+
+$plugin = plugin_basename(__FILE__);
+add_filter( "plugin_action_links_$plugin", 'cf7ic_add_plugin_link');
+
+function cf7ic_add_plugin_link( $links ) {
+	if ( is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) {
+		$support_link = '<a href="https://geekcodelab.com/contact/" target="_blank" >' . __( 'Support', 'invitation-code-for-contact-form-7' ) . '</a>';
+		array_unshift( $links, $support_link );
+		
+		$setting_link = '<a href="'. admin_url('edit.php?post_type=cf7ic_invite_codes') .'">' . __( 'Settings', 'invitation-code-for-contact-form-7' ) . '</a>';
+		array_unshift( $links, $setting_link );
+	}
+	return $links;
+}
