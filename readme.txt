@@ -2,10 +2,10 @@
 Contributors: rajkakadiya, rvadhel
 Donate link: https://paypal.me/rvadhel
 Tags: contact form 7, cf7 invitation code, cf7 verification, cf7 subscribers
-Requires PHP: 5.2.4
-Requires at least: 3.0.1
-Tested up to: 6.2.2
-Stable tag: 1.7
+Requires PHP: 7.4
+Requires at least: 6.3
+Tested up to: 6.5
+Stable tag: 1.8
 License: GPLv2 or later
 
 Invitation Code for Contact Form 7 helps you to find confirm subscribers and connect subscribers to your business.
@@ -43,6 +43,9 @@ After active plugin go to Contact form 7-> Invitation Codes
 6. Contact form
 
 == Changelog ==
+= 1.8=
+ Tested up to wp version 6.5 
+
 = 1.7 =
  Added admin validation on invitation code options.
 
