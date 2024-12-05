@@ -43,6 +43,11 @@ After active plugin go to Contact form 7-> Invitation Codes
 6. Contact form
 
 == Changelog ==
+
+= 1.8.0 =
+ Fix Bug
+ Added auto updated function
+
 = 1.7.1 =
  Tested up to wp version 6.5 
 
