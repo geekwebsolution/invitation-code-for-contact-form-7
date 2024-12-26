@@ -19,7 +19,6 @@ function cf7ic_updater_utility() {
     return $settings;
 }
 
-register_activation_hook(__FILE__, 'cf7ic_updater_activate');
 function cf7ic_updater_activate() {
 
     // Refresh transients

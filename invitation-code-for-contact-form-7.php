@@ -26,6 +26,7 @@ if (!defined("CF7IC_PLUGIN_DIR"))
 
 
 add_action( 'admin_init', 'cf7ic_plugin_load' );
+register_activation_hook(__FILE__, 'cf7ic_updater_activate');
 add_action('upgrader_process_complete', 'cf7ic_updater_activate'); // remove  transient  on plugin  update
 
 
